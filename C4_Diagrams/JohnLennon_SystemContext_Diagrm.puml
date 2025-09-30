@@ -1,0 +1,7 @@
+@startuml
+!include <C4/C4_Container.puml>
+!include <C4/C4_Component.puml>
+
+System(jlsBoundry, "John Lennon's Store Software System", \
+"Permette agli utenti di gestire le anagrafiche")
+@enduml

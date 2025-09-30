@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container.puml>
+!include <C4/C4_Component.puml>
+
+System_Boundary(jlsBoundry, "John Lennon's Store Software System") {
+  Container(ui, "UI", "C#, .NET", \
+  "App di User Interface per gestione crenziali utente")
+
+  Container(backend,"Backend","C#,.NET","Fornisce funzionalità per la gestione anagrafiche")
+
+  database "User Database\nContiene le anagrafiche utenti" as usersDb
+  skinparam databaseBackgroundColor #333333
+  skinparam databaseFontColor #FFFFFF
+
+  Rel(ui,backend,"Chiamata API a", "HTTPS")
+  Rel(backend,usersDb,"CRUD a", "MySQL")
+}
+@enduml
