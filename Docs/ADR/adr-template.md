@@ -1,18 +1,10 @@
 status: "{proposed | rejected | accepted | deprecated | … | superseded by ADR-0123"}
 
-
 # {short title, representative of solved problem and found solution}
 
 ## Context and Problem Statement
 
 {Describe the context and problem statement, e.g., in free form using two to three sentences or in the form of an illustrative story. You may want to articulate the problem in form of a question and add links to collaboration boards or issue management systems.}
-
-<!-- This is an optional element. Feel free to remove. -->
-## Decision Drivers
-
-* {decision driver 1, e.g., a force, facing concern, …}
-* {decision driver 2, e.g., a force, facing concern, …}
-* … <!-- numbers of drivers can vary -->
 
 ## Considered Options
 

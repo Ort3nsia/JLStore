@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JLStore")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c8025c1fbb99a6393872b64daf66be5c246a37a8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2244c9897ca696a3bc882db5ba5d40c477776c4d")]
 [assembly: System.Reflection.AssemblyProductAttribute("JLStore")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JLStore")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
