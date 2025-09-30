@@ -1,0 +1,6 @@
+@JLStore_HostAddress = http://localhost:5002
+
+GET {{JLStore_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "bHqj5+wRwMQ=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\anton\\OneDrive\\Desktop\\Progetto\\JLStore\\JLStore\\JLStore.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\anton\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.9\\microsoft.aspnetcore.openapi.9.0.9.nupkg.sha512",
+    "C:\\Users\\anton\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
