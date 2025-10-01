@@ -1,4 +1,4 @@
-## Status: Rifiutato
+## Status: Accettato
 
 # Decisione sull'uso delle interfacce per i servizi
 
@@ -13,8 +13,8 @@ Nel contesto della gestione dei servizi per le operazioni CRUD e la mappatura tr
 
 ## Decision Outcome
 
-La scelta di mantenere la struttura attuale senza interfacce è giustificata dalla semplicità del sistema e dalla mancanza di necessità immediata di flessibilità o complessità aggiuntiva.
+La scelta e' quella di implementare una singola interfaccia al momento, nonostante non vi siano regole di business. Questo viene fatto per consentire in futuro di estendere i vari servizi.
 
 ### Consequences
 
-Tuttavia, questa decisione potrebbe rendere più difficile l'estensione del sistema in futuro, e ridurre la testabilità a lungo termine. Se il sistema dovesse evolvere verso operazioni più complesse o un'architettura più scalabile, si dovrebbero rivalutare le scelte architetturali, inclusa l'introduzione di interfacce.
+Aprendo i servizi alla estendibilita', si va incontro ad una complessita' di codice maggiore.
