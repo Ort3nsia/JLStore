@@ -2,17 +2,17 @@
 JLS
 ├── Program.cs
 ├── ... (File di configurazione ecc...)
-├── JLS.FrameworkAndDrivers/
+├── FrameworkAndDrivers/
 │   ├── Externals/
 │   │   └── CustomersDbContext.cs
 │   └── Repository/
 │       └── CustomersRepository.cs
-├── JLS.InterfaceAdapters/
+├── InterfaceAdapters/
 │   ├── Interfaces/
 │   │   └── ICustomersController.cs
 │   └── Controllers/
 │       └── CustomersController.cs
-├── JLS.UseCases/
+├── UseCases/
 │   ├── Interfaces/
 │   │   └── ICustomersService.cs
 │   ├── DTOs/
@@ -21,7 +21,7 @@ JLS
 │   │   └── CustomersReadDTO.cs
 │   └── Services/
 │       └── CustomersServices.cs
-└── JLS.Entities/
+└── Entities/
     ├── Interfaces/
     │   └── ICustomersRepository.cs
     └── Domain/
