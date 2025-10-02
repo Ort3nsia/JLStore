@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext (esempio SQLite; cambia se usi altro)
-builder.Services.AddDbContext<DataContext>(opt =>
-    opt.UseSqlite(builder.Configuration.GetConnectionString("Default") 
-                ?? "Data Source=./data/jlstore.db"));
+var conn = builder.Configuration.GetConnectionString("Default")
+           ?? "Data Source=./data/jlstore.db";
+
+builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlite(conn));
 
 // DI
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
@@ -43,11 +43,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 
-// (facoltativo) seed DB al boot:
-// using (var scope = app.Services.CreateScope())
-// {
-//     var ctx = scope.ServiceProvider.GetRequiredService<DataContext>();
-//     await DataSeed.EnsureSeedAsync(ctx);
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<DataContext>();
+    await DataSeed.EnsureSeedAsync(ctx);
+}
 
 await app.RunAsync();
