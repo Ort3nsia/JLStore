@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 var conn = builder.Configuration.GetConnectionString("Default")
-           ?? "Data Source=./data/jlstore.db";
+           ?? "Data Source=./Data/jlstore.db";
 
 builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlite(conn));
 
