@@ -1,29 +1,36 @@
 ```
-JLS
-├── Program.cs
-├── ... (File di configurazione ecc...)
-├── FrameworkAndDrivers/
-│   ├── Externals/
-│   │   └── CustomersDbContext.cs
-│   └── Repository/
-│       └── CustomersRepository.cs
-├── InterfaceAdapters/
-│   ├── Interfaces/
-│   │   └── ICustomersController.cs
-│   └── Controllers/
-│       └── CustomersController.cs
-├── UseCases/
-│   ├── Interfaces/
-│   │   └── ICustomersService.cs
-│   ├── DTOs/
-│   │   ├── CustomersCreateDTO.cs
-│   │   ├── CustomersUpdateDTO.cs
-│   │   └── CustomersReadDTO.cs
-│   └── Services/
-│       └── CustomersServices.cs
-└── Entities/
-    ├── Interfaces/
-    │   └── ICustomersRepository.cs
-    └── Domain/
-        └── Customers.cs
+JLS/                       (progetto Web API)
+├─ Controllers/
+│   └─ CustomerController.cs
+│
+├─ Domain/
+│   ├─ Models/
+│   │   └─ Customer.cs
+│   ├─ Repositories/
+│   │   └─ ICustomerRepository.cs
+│   └─ Services/
+│       ├─ ICustomerService.cs
+│       └─ CustomerService.cs
+│
+├─ Dto/
+│   ├─ CustomerDto.cs
+│   ├─ CustomerCreateDto.cs
+│   └─ CustomerUpdateDto.cs
+│
+├─ Infrastructure/
+│   ├─ Data/
+│   │   ├─ DataContext.cs
+│   │   └─ DataSeed.cs
+│   └─ Repositories/
+│       └─ CustomerRepository.cs
+│
+├─ Mappings/
+│   └─ CustomerProfile.cs
+│
+├─ Migrations/
+│   └─ ... (generate da EF Core)
+│
+├─ appsettings.json
+├─ appsettings.Development.json
+└─ Program.cs
 ```

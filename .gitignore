@@ -1,0 +1,76 @@
+# --- Build output ---
+bin/
+obj/
+out/
+artifacts/
+**/Debug/
+**/Release/
+publish/
+
+# --- IDE / Editor ---
+.vs/
+.idea/
+*.sln.iml
+
+# VS Code: tieni solo file condivisibili
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# --- File utente / temporanei ---
+*.user
+*.suo
+*.cache
+*.log
+*.pid
+*.svclog
+
+# --- Test / Coverage / Benchmark ---
+TestResults/
+.vstest/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+.benchmarks/
+BenchmarkDotNet.Artifacts/
+
+# --- NuGet / Artefatti ---
+packages/
+*.nupkg
+*.snupkg
+
+# --- Publish / Azure ---
+*.azurePubxml
+*.pubxml
+*.pubxml.user
+PublishProfiles/*.*user
+
+# --- Config locali / Segreti ---
+.env
+.env.*
+!env.example
+secrets.json
+*.pfx
+*.p12
+*.key
+*.cer
+*.crt
+appsettings.Local.json
+appsettings.*.local.json
+appsettings.Development.local.json
+
+# --- Frontend eventuale (se presenti) ---
+node_modules/
+dist/
+build/
+wwwroot/node_modules/
+wwwroot/dist/
+
+# --- Docker (override locale) ---
+docker-compose.override.yml
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
