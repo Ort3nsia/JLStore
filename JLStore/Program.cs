@@ -1,45 +1,52 @@
+using JLStore.Domain.Repositories;
+using JLStore.Domain.Services;
+using JLStore.Infrastructure.Data;
+using JLStore.Infrastructure.Repositories;
+using JLStore.Mapping;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var conn = builder.Configuration.GetConnectionString("Default")
+           ?? "Data Source=./data/jlstore.db";
+
+builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlite(conn));
+
+// DI
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+// AutoMapper (v15+)
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<CustomerProfile>();
+});
+
+
+// API + Swagger
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwaggerUi(options =>
+    app.UseSwagger();
+    app.UseSwaggerUI(o =>
     {
-        options.DocumentPath = "/openapi/v1.json";
+        o.SwaggerEndpoint("/swagger/v1/swagger.json", "JLStore API v1");
+        o.RoutePrefix = string.Empty; // UI su "/"
     });
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
-var summaries = new[]
+using (var scope = app.Services.CreateScope())
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    var ctx = scope.ServiceProvider.GetRequiredService<DataContext>();
+    await DataSeed.EnsureSeedAsync(ctx);
 }
+
+await app.RunAsync();
