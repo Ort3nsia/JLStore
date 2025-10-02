@@ -7,7 +7,7 @@ public class Customer
     public string Surname { get; private set; }
     private Customer() { }
 
-    public Customer(int ID, string Name, string Surname)
+    public Customer(string Name, string Surname)
     {
         UpdateFullName(Name, Surname);
     }

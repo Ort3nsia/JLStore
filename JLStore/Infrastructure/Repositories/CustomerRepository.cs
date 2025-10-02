@@ -32,6 +32,7 @@ public class CustomerRepository(DataContext context) : ICustomerRepository
 
     public async Task<bool> SaveChangesAsync()
     {
-        return await context.SaveChangesAsync() > 0; // Restituisce true se almeno una riga è stata interessata, altrimenti false.
+        // Restituisce true se almeno una riga è stata interessata, altrimenti false.
+        return await context.SaveChangesAsync() > 0; 
     }
 }
