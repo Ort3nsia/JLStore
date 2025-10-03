@@ -6,6 +6,8 @@ artifacts/
 **/Debug/
 **/Release/
 publish/
+jlstore.db
+
 
 # --- IDE / Editor ---
 .vs/
