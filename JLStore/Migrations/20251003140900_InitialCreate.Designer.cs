@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JLStore.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251002150720_InitialCreate")]
+    [Migration("20251003140900_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
