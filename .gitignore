@@ -7,10 +7,8 @@ artifacts/
 **/Release/
 publish/
 
-20251002150720_InitialCreate.cs
-20251002150720_InitialCreate.Designer.cs
-DataContextModelSnapshot.cs
-jlstore.db
+Migrations/*
+Data/*
 
 
 # --- IDE / Editor ---
