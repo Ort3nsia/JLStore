@@ -27,6 +27,9 @@ JLS/                       (progetto Web API)
 ├─ Mappings/
 │   └─ CustomerProfile.cs
 │
+├─ Helpers/
+│   └─ StringHelpers.cs
+│
 ├─ Migrations/
 │   └─ ... (generate da EF Core)
 │
