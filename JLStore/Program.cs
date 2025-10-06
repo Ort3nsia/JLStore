@@ -30,7 +30,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || 
+    Environment.GetEnvironmentVariable("FORCE_SWAGGER") == "1")
 {
     app.UseSwagger();
     app.UseSwaggerUI(o =>
@@ -40,7 +41,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (Environment.GetEnvironmentVariable("DISABLE_HTTPS_REDIRECT") != "1")
+{
+    app.UseHttpsRedirection();
+}
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
