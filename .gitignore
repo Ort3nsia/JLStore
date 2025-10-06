@@ -7,7 +7,6 @@ artifacts/
 **/Release/
 publish/
 
-JLStore/Migrations/*
 JLStore/Data/*
 
 
