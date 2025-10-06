@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 var conn = builder.Configuration.GetConnectionString("Default")
            ?? "Data Source=./Data/jlstore.db";
 
-builder.Services.AddDbContext<DataContext>(opt => opt.UseSqlite(conn));
+builder.Services.AddDbContext<DataContext>(opt =>
+    opt.UseSqlServer(conn, o => o.EnableRetryOnFailure()));
+
 
 // DI
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
