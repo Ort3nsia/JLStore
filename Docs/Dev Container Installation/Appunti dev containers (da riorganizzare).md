@@ -66,7 +66,7 @@
     docker --version
     ```
     se il comando non è rilevato allora è necessario aprire Docker Desktop, navigare in *Impostazioni -> Risorse -> WSL Integration -> Abilitare Ubuntu* <br>
-    ![Ubuntu Abilitation](image.png)
+    ![Ubuntu Abilitation](docker_desktop_ubuntu.png)
     in caso la pagina *Risorse* non presenti WSL Integration, inserire il comando:
     ```
     & "C:\Program Files\Docker\Docker\DockerCli.exe" -SwitchDaemon
