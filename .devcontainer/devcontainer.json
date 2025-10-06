@@ -22,30 +22,30 @@
 		]
 		}
 	},
-    "forwardPorts": [5250/*, 7250*/],
+    "forwardPorts": [5250, 7250],
 	"portsAttributes": {
-			/*"7250": {
+			"7250": {
 				"protocol": "https"
-			},*/
+			},
             "5250": {
 				"protocol": "http"
 			}
 	},
 	
 	"containerEnv": {
-    "ASPNETCORE_URLS": /*"https://+:7250;*/"http://+:5250",
-    //"ASPNETCORE_Kestrel__Certificates__Default__Path": "/https/aspnetapp.pfx",
-    //"ASPNETCORE_Kestrel__Certificates__Default__Password": "devcert"
-	"DISABLE_HTTPS_REDIRECT": "1"
+    "ASPNETCORE_URLS": "https://+:7250;http://+:5250",
+    "ASPNETCORE_Kestrel__Certificates__Default__Path": "/https/aspnetapp.pfx",
+    "ASPNETCORE_Kestrel__Certificates__Default__Password": "devcert"
+	//"DISABLE_HTTPS_REDIRECT": "1"
   	},
 	
 	"remoteEnv": { "HTTP_PORTS": "", "HTTPS_PORTS": "" },
 
 	"mounts": ["source=devcerts,target=/https,type=volume"],
 
-	"postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj"
+	//"postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj"
 
-  	//"postCreateCommand": "bash -lc 'sudo mkdir -p /https && sudo chown -R $(id -u):$(id -g) /https && (dotnet dev-certs https --check -q || dotnet dev-certs https -q) && dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert && dotnet restore ./JLStore/JLStore.csproj'"
+  	"postCreateCommand": "bash -lc 'sudo mkdir -p /https && sudo chown -R $(id -u):$(id -g) /https && (dotnet dev-certs https --check -q || dotnet dev-certs https -q) && dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert && dotnet restore ./JLStore/JLStore.csproj'"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

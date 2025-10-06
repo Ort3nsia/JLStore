@@ -41,10 +41,12 @@ if (app.Environment.IsDevelopment() ||
     });
 }
 
-if (Environment.GetEnvironmentVariable("DISABLE_HTTPS_REDIRECT") != "1")
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
