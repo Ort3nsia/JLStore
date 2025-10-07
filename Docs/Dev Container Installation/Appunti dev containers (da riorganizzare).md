@@ -94,3 +94,29 @@ dotnet run --project ./JLStore/JLStore.csproj
 test
 
 A quanto pare podman per ora funziona
+
+--------------------------------------------------------------------------
+Da Windows powershell, non nel container bisogna scaricare tramite python:
+
+        python -m pip install --user pipx
+
+settare nel path di sistema
+
+        python -m pipx ensurepath
+
+Chiudere e riaprire powershell
+Verificare se pipx e' installato " pipx --version"
+
+Installare podman compose:
+        pipx install podman-compose
+
+Verificare che podman funzioni con
+        podman-compose --version
+
+Ora...
+Eseguiamo la macchina di podman, se non gia' fatto dalla UI con 
+        podman machine start
+
+Riavvia VSCode se non gia' fatto, apri la powershell e va nel percorso del yml e usa il comando "podman-compose up -d" per runnare il compose.
+Per buttare giu' il compose "podman-compose down" mentre "podman-compose down -v" per levare anche i volumi.
+--------------------------------------------------------------------------
