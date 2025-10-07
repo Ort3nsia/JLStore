@@ -2,6 +2,10 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
 	"name": "JLStore DevContainer",
+	"build": {
+  	"dockerfile": "../Containerfile",
+  	"context": ".."
+	},
 	"workspaceFolder": "/workspaces/JLStore",
 	"customizations": {
 		"vscode": {
