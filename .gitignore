@@ -51,9 +51,9 @@ packages/
 PublishProfiles/*.*user
 
 # --- Config locali / Segreti ---
-.env
-.env.*
-!env.example
+#.env
+#.env.*
+#!env.example
 secrets.json
 *.pfx
 *.p12
