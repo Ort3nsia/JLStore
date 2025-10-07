@@ -12,8 +12,6 @@ services:
     volumes:
       - mssqldata:/var/opt/mssql
     healthcheck:
-      # ATTENZIONE: la toolchain sqlcmd potrebbe non essere presente nell'immagine base.
-      # Se fallisce il healthcheck, togli il blocco healthcheck o usa un metodo diverso.
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || exit 1"]
       interval: 5s
       timeout: 3s
@@ -22,7 +20,7 @@ services:
   jlstore-app:
     build:
       context: .
-      dockerfile: ./Containerfile   # <- usa proprio "containerfile" (minuscolo), perché il file che hai è minuscolo
+      dockerfile: ./JLStore/Containerfile
     container_name: jlstore-app
     depends_on:
       mssql:
@@ -40,7 +38,6 @@ services:
       - "7250:7250"
     restart: unless-stopped
 
-  # opzionale: genera il certificato dev la prima volta
   devcert-init:
     image: mcr.microsoft.com/dotnet/sdk:9.0
     command: bash -lc "mkdir -p /https && (dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert -q) || true"
