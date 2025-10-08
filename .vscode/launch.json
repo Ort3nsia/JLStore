@@ -29,12 +29,10 @@
         "pipeProgram": "podman-compose",
         "pipeArgs": ["exec", "-T", "jlstore-app", "sh", "-c"],
         "debuggerPath": "/vsdbg/vsdbg"
-
       },
       "sourceFileMap": {
         "/src": "${workspaceFolder}/JLStore"
       },
-      "logging": { "engineLogging": true, "moduleLoad": true }
     },
     {
       "name": "Attach .NET (Docker Compose)",
