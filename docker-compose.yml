@@ -19,7 +19,16 @@ services:
 
   devcert-init:
     image: mcr.microsoft.com/dotnet/sdk:9.0
-    command: bash -lc "mkdir -p /https && (dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert -q) || true"
+    environment:
+      APP_UID: "1000"
+    command: >
+      bash -lc "
+        mkdir -p /https &&
+        dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert -q &&
+        chown -R ${APP_UID}:${APP_UID} /https &&
+        chmod 750 /https &&
+        chmod 640 /https/aspnetapp.pfx
+      "
     volumes:
       - devcerts:/https
     restart: "no"
@@ -30,6 +39,8 @@ services:
       dockerfile: Containerfile
     container_name: jlstore-app
     depends_on:
+      devcert-init:
+        condition: service_completed_successfully
       mssql:
         condition: service_healthy
     environment:
@@ -39,7 +50,7 @@ services:
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
       ASPNETCORE_Kestrel__Certificates__Default__Password: "devcert"
     volumes:
-      - devcerts:/https:ro,U
+      - devcerts:/https:ro
     ports:
       - "5250:5250"
       - "7250:7250"
