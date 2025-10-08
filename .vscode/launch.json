@@ -19,7 +19,7 @@
       }
     },
     {
-      "name": "Attach .NET (Docker jlstore-app)",
+      "name": "Attach .NET (Podman Compose)",
       "type": "coreclr",
       "request": "attach",
       "processId": "${command:pickProcess}",
