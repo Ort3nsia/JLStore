@@ -19,8 +19,8 @@ services:
 
   jlstore-app:
     build:
-      context: .
-      dockerfile: ./JLStore/Containerfile
+      context: ./JLStore
+      dockerfile: Containerfile
     container_name: jlstore-app
     depends_on:
       mssql:

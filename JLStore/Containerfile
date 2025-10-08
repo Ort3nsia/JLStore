@@ -11,12 +11,12 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 WORKDIR /src    
 # Copiamo i file di progetto e ripristiniamo le dipendenze
-COPY JLStore/JLStore.csproj JLStore/
-RUN dotnet restore JLStore/JLStore.csproj
+COPY JLStore.csproj .
+RUN dotnet restore JLStore.csproj
 # Copiamo il resto del codice sorgente
 COPY . .
 
-WORKDIR /src/JLStore
+WORKDIR /src
 # Costruiamo l'applicazione in modalità Release
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
