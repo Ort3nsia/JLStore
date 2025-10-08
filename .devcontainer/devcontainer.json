@@ -4,7 +4,7 @@
 	"name": "JLStore DevContainer",
 	"build": {
 	"context": "../JLStore",
-  	"dockerfile": "Containerfile"
+  	"dockerfile": "../JLStore/Containerfile"
 	},
 	"workspaceFolder": "/workspaces/JLStore",
 	"customizations": {

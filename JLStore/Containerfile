@@ -16,12 +16,23 @@ RUN dotnet restore JLStore.csproj
 # Copiamo il resto del codice sorgente
 COPY . .
 
-WORKDIR /src
 # Costruiamo l'applicazione in modalità Release
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish JLStore.csproj -c Debug -o /app/publish /p:UseAppHost=false \
+    -p:DebugSymbols=true -p:DebugType=portable \
+    -p:PublishTrimmed=false -p:PublishReadyToRun=false
 
 FROM base AS final
 WORKDIR /app
+
+USER root
+RUN apt-get update && apt-get install -y wget unzip \
+ && mkdir -p /vsdbg \
+ && wget -q https://aka.ms/getvsdbgsh -O /tmp/getvsdbg.sh \
+ && bash /tmp/getvsdbg.sh -v latest -l /vsdbg \
+ && rm -rf /var/lib/apt/lists/*
+
+USER vscode
+
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "JLStore.dll"]
 

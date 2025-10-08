@@ -19,10 +19,36 @@
       }
     },
     {
-      "name": ".NET Core Attach",
+      "name": "Attach .NET (Docker jlstore-app)",
       "type": "coreclr",
       "request": "attach",
-      "processId": "${command:pickProcess}"
+      "processId": "${command:pickProcess}",
+      "justMyCode": false,
+       "pipeTransport": {
+        "pipeCwd": "${workspaceFolder}",
+        "pipeProgram": "podman-compose",
+        "pipeArgs": ["exec", "-T", "jlstore-app", "sh", "-c"],
+        "debuggerPath": "/vsdbg/vsdbg"
+
+      },
+      "sourceFileMap": {
+        "/src": "${workspaceFolder}/JLStore"
+      },
+      "logging": { "engineLogging": true, "moduleLoad": true }
+    },
+    {
+      "name": "Attach .NET (Docker Compose)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}",
+      "justMyCode": false,
+      "pipeTransport": {
+        "pipeCwd": "${workspaceFolder}",
+        "pipeProgram": "docker",
+        "pipeArgs": ["compose", "exec", "-T", "jlstore-app", "sh", "-c"],
+        "debuggerPath": "/vsdbg/vsdbg"
+      },
+      "sourceFileMap": { "/src": "${workspaceFolder}/JLStore" }
     }
   ]
 }
