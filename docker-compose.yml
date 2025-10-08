@@ -3,8 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: jlstore-mssql
     restart: unless-stopped
-    ports:
-      - "1433:1433"
+    ports: ["1433:1433"]
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
@@ -20,18 +19,23 @@ services:
   devcert-init:
     image: mcr.microsoft.com/dotnet/sdk:9.0
     environment:
-      APP_UID: "1000"
+      APP_UID: "1000"           # <-- UID con cui gira jlstore-app (es. 1000 per USER vscode, 64198 per 'app' delle immagini aspnet)
+      APP_GID: "1000"           # <-- opzionale; se non lo metti userà APP_UID
+      CERT_PASSWORD: "devcert"  # <-- deve combaciare con jlstore-app
     command: >
-      bash -lc "
-        mkdir -p /https &&
-        dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert -q &&
-        chown -R ${APP_UID}:${APP_UID} /https &&
-        chmod 750 /https &&
-        chmod 640 /https/aspnetapp.pfx
-      "
+      bash -lc '
+        set -e
+        mkdir -p /https
+        if [ ! -f /https/aspnetapp.pfx ]; then
+          dotnet dev-certs https -ep /https/aspnetapp.pfx -p "${CERT_PASSWORD}" -q
+        fi
+        chown -R "${APP_UID:-1000}":"${APP_GID:-${APP_UID:-1000}}" /https || true
+        chmod 755 /https
+        chmod 644 /https/aspnetapp.pfx
+      '
     volumes:
       - devcerts:/https
-    restart: "no"
+    restart: "no" 
 
   jlstore-app:
     build:
@@ -39,13 +43,15 @@ services:
       dockerfile: Containerfile
     container_name: jlstore-app
     depends_on:
-      devcert-init:
-        condition: service_completed_successfully
       mssql:
         condition: service_healthy
+      devcert-init:
+        condition: service_completed_successfully
     environment:
-      ASPNETCORE_URLS: "https://+:7250;http://+:5250"
       ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "https://+:7250;http://+:5250"
+      ASPNETCORE_HTTPS_PORTS: "7250"
+      ASPNETCORE_HTTP_PORTS: "5250"
       ConnectionStrings__Default: "Server=mssql,1433;Database=jlstore;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
       ASPNETCORE_Kestrel__Certificates__Default__Password: "devcert"
