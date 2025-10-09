@@ -19,23 +19,22 @@ services:
   devcert-init:
     image: mcr.microsoft.com/dotnet/sdk:9.0
     environment:
-      APP_UID: "1000"           # <-- UID con cui gira jlstore-app (es. 1000 per USER vscode, 64198 per 'app' delle immagini aspnet)
-      APP_GID: "1000"           # <-- opzionale; se non lo metti userà APP_UID
-      CERT_PASSWORD: "devcert"  # <-- deve combaciare con jlstore-app
+      CERT_PASSWORD: "${CERT_PASSWORD}"
     command: >
       bash -lc '
-        set -e
+        set -euo pipefail
         mkdir -p /https
-        if [ ! -f /https/aspnetapp.pfx ]; then
-          dotnet dev-certs https -ep /https/aspnetapp.pfx -p "${CERT_PASSWORD}" -q
+        rm -f /https/aspnetapp.pfx
+        dotnet dev-certs https -ep /https/aspnetapp.pfx -p "$CERT_PASSWORD" -q
+        if ! openssl pkcs12 -in /https/aspnetapp.pfx -passin pass:"$CERT_PASSWORD" -nokeys -clcerts >/dev/null 2>&1; then
+          echo "ERRORE: PFX non apribile con la password fornita"; exit 1
         fi
-        chown -R "${APP_UID:-1000}":"${APP_GID:-${APP_UID:-1000}}" /https || true
-        chmod 755 /https
         chmod 644 /https/aspnetapp.pfx
+        ls -l /https
       '
     volumes:
       - devcerts:/https
-    restart: "no" 
+    restart: "no"
 
   jlstore-app:
     build:
@@ -54,7 +53,7 @@ services:
       ASPNETCORE_HTTP_PORTS: "5250"
       ConnectionStrings__Default: "Server=mssql,1433;Database=jlstore;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
-      ASPNETCORE_Kestrel__Certificates__Default__Password: "devcert"
+      ASPNETCORE_Kestrel__Certificates__Default__Password: "${CERT_PASSWORD:-devcert}"
     volumes:
       - devcerts:/https:ro
     ports:
