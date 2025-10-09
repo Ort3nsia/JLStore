@@ -15,16 +15,15 @@
     }
   },
 
-  // ✅ Volume NuGet persistente (tutta la cartella, non solo "packages")
+  // Volume persistente
   "mounts": [
     "source=devcerts,target=/https,type=volume",
     "source=nuget-cache,target=/home/vscode/.nuget,type=volume"
   ],
 
-  // ✅ Eseguito una sola volta alla PRIMA creazione del container (prima di postCreate)
-  //    Crea le dir e sistema i permessi, così NuGet può scrivere il suo Config.
+  // Eseguito a creazione
   "onCreateCommand": "sudo mkdir -p /home/vscode/.nuget/NuGet /home/vscode/.nuget/packages && sudo chown -R vscode:vscode /home/vscode/.nuget",
 
-  // ✅ Restore + build automatici (niente comandi manuali)
+  // Restore and rebuild
   "postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj -v minimal && dotnet build ./JLStore/JLStore.csproj -v minimal"
 }
