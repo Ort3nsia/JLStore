@@ -1,32 +1,29 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-	"name": "JLStore DevContainer",
-	"build": {
-	"context": "../JLStore",
-  	"dockerfile": "../JLStore/Containerfile"
-	},
-	"workspaceFolder": "/workspaces/JLStore",
-	"customizations": {
-		"vscode": {
-		"extensions": [
-			"ms-dotnettools.vscode-dotnet-runtime",
-			"ms-dotnettools.csharp",
-            "ms-dotnettools.csdevkit",
-            "ms-azuretools.vscode-containers",
-            "ms-vscode-remote.remote-containers",
-            "ms-vscode.remote-server",
-            "ms-vscode.remote-explorer",
-            "ms-vscode-remote.remote-wsl",
-            "streetsidesoftware.code-spell-checker"
-		]
-		}
-	},
-	"mounts": ["source=devcerts,target=/https,type=volume"]
-	
-	//"remoteEnv": { "HTTP_PORTS": "", "HTTPS_PORTS": "" },
+  "name": "JLStore DevContainer",
+  "build": {
+    "context": "../JLStore",
+    "dockerfile": "../JLStore/Containerfile"
+  },
+  "workspaceFolder": "/workspaces/JLStore",
 
-	//"postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj"
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-dotnettools.csharp"
+      ]
+    }
+  },
 
-  	//"postCreateCommand": "bash -lc 'sudo mkdir -p /https && sudo chown -R $(id -u):$(id -g) /https && (dotnet dev-certs https --check -q || dotnet dev-certs https -q) && dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert && dotnet restore ./JLStore/JLStore.csproj'"
+  // Volume persistente
+  "mounts": [
+    "source=devcerts,target=/https,type=volume",
+    "source=nuget-cache,target=/home/vscode/.nuget,type=volume"
+  ],
+
+  // Eseguito a creazione
+  "onCreateCommand": "sudo mkdir -p /home/vscode/.nuget/NuGet /home/vscode/.nuget/packages && sudo chown -R vscode:vscode /home/vscode/.nuget",
+
+  // Restore and rebuild
+  "postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj -v minimal && dotnet build ./JLStore/JLStore.csproj -v minimal"
 }

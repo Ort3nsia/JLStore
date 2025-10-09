@@ -1,22 +1,19 @@
 # Utilizziamo dotnet:1-9.0-bookworm come immagine di base
 FROM mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm AS base
-# Impostiamo la directory di lavoro
 WORKDIR /app
-# Esponiamo la porta per l'applicazione
-#EXPOSE 5250
-#EXPOSE 7250
 
 # Fase di build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
-WORKDIR /src    
+WORKDIR /src
 # Copiamo i file di progetto e ripristiniamo le dipendenze
 COPY JLStore.csproj .
 RUN dotnet restore JLStore.csproj
+
 # Copiamo il resto del codice sorgente
 COPY . .
 
-# Costruiamo l'applicazione in modalità Release
+# Costruiamo l'applicazione in modalità Debug (come avevi)
 RUN dotnet publish JLStore.csproj -c Debug -o /app/publish /p:UseAppHost=false \
     -p:DebugSymbols=true -p:DebugType=portable \
     -p:PublishTrimmed=false -p:PublishReadyToRun=false
@@ -25,14 +22,13 @@ FROM base AS final
 WORKDIR /app
 
 USER root
-RUN apt-get update && apt-get install -y wget unzip \
+RUN apt-get update && apt-get install -y --no-install-recommends wget unzip ca-certificates \
  && mkdir -p /vsdbg \
  && wget -q https://aka.ms/getvsdbgsh -O /tmp/getvsdbg.sh \
  && bash /tmp/getvsdbg.sh -v latest -l /vsdbg \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* /tmp/getvsdbg.sh
 
 USER vscode
 
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "JLStore.dll"]
-
