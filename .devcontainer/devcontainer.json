@@ -21,32 +21,10 @@
             "streetsidesoftware.code-spell-checker"
 		]
 		}
-	}
-
-	//"features": {
-	//	"ghcr.io/devcontainers/features/dotnet:2": {}
-	//},
-    /*"forwardPorts": [5250, 7250],
-	"portsAttributes": {
-			"7250": {
-				"protocol": "https"
-			},
-            "5250": {
-				"protocol": "http"
-			}
-	},*/
-	
-	/*"containerEnv": {
-    "ASPNETCORE_URLS": "https://+:7250;http://+:5250",
-    "ASPNETCORE_Kestrel__Certificates__Default__Path": "/https/aspnetapp.pfx",
-    "ASPNETCORE_Kestrel__Certificates__Default__Password": "devcert",
-	"ConnectionStrings__Default": "Server=host.docker.internal,1433;Database=jlstore;User Id=sa;Password=StrongPassw0rd!;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
-	//"DISABLE_HTTPS_REDIRECT": "1"
-  	},*/
+	},
+	"mounts": ["source=devcerts,target=/https,type=volume"]
 	
 	//"remoteEnv": { "HTTP_PORTS": "", "HTTPS_PORTS": "" },
-
-	//"mounts": ["source=devcerts,target=/https,type=volume"],
 
 	//"postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj"
 
