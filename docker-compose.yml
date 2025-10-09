@@ -3,8 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: jlstore-mssql
     restart: unless-stopped
-    ports:
-      - "1433:1433"
+    ports: ["1433:1433"]
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
@@ -17,33 +16,50 @@ services:
       timeout: 3s
       retries: 30
 
+  devcert-init:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    environment:
+      CERT_PASSWORD: "${CERT_PASSWORD}"
+    command: >
+      bash -lc '
+        set -euo pipefail
+        mkdir -p /https
+        rm -f /https/aspnetapp.pfx
+        dotnet dev-certs https -ep /https/aspnetapp.pfx -p "$CERT_PASSWORD" -q
+        if ! openssl pkcs12 -in /https/aspnetapp.pfx -passin pass:"$CERT_PASSWORD" -nokeys -clcerts >/dev/null 2>&1; then
+          echo "ERRORE: PFX non apribile con la password fornita"; exit 1
+        fi
+        chmod 644 /https/aspnetapp.pfx
+        ls -l /https
+      '
+    volumes:
+      - devcerts:/https
+    restart: "no"
+
   jlstore-app:
     build:
-      context: .
-      dockerfile: ./JLStore/Containerfile
+      context: ./JLStore
+      dockerfile: Containerfile
     container_name: jlstore-app
     depends_on:
       mssql:
         condition: service_healthy
+      devcert-init:
+        condition: service_completed_successfully
     environment:
-      ASPNETCORE_URLS: "https://+:7250;http://+:5250"
       ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "https://+:7250;http://+:5250"
+      ASPNETCORE_HTTPS_PORTS: "7250"
+      ASPNETCORE_HTTP_PORTS: "5250"
       ConnectionStrings__Default: "Server=mssql,1433;Database=jlstore;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
       ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
-      ASPNETCORE_Kestrel__Certificates__Default__Password: "devcert"
+      ASPNETCORE_Kestrel__Certificates__Default__Password: "${CERT_PASSWORD:-devcert}"
     volumes:
-      - devcerts:/https
+      - devcerts:/https:ro
     ports:
       - "5250:5250"
       - "7250:7250"
     restart: unless-stopped
-
-  devcert-init:
-    image: mcr.microsoft.com/dotnet/sdk:9.0
-    command: bash -lc "mkdir -p /https && (dotnet dev-certs https -ep /https/aspnetapp.pfx -p devcert -q) || true"
-    volumes:
-      - devcerts:/https
-    restart: "no"
 
 volumes:
   mssqldata:

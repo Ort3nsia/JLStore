@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": ".NET Core Launch (web)",
+      "name": "Backend Debugger",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -19,10 +19,34 @@
       }
     },
     {
-      "name": ".NET Core Attach",
+      "name": "Attach .NET (Podman Compose)",
       "type": "coreclr",
       "request": "attach",
-      "processId": "${command:pickProcess}"
+      "processId": "${command:pickProcess}",
+      "justMyCode": false,
+       "pipeTransport": {
+        "pipeCwd": "${workspaceFolder}",
+        "pipeProgram": "podman-compose",
+        "pipeArgs": ["exec", "-T", "jlstore-app", "sh", "-c"],
+        "debuggerPath": "/vsdbg/vsdbg"
+      },
+      "sourceFileMap": {
+        "/src": "${workspaceFolder}/JLStore"
+      },
+    },
+    {
+      "name": "Attach .NET (Docker Compose)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}",
+      "justMyCode": false,
+      "pipeTransport": {
+        "pipeCwd": "${workspaceFolder}",
+        "pipeProgram": "docker",
+        "pipeArgs": ["compose", "exec", "-T", "jlstore-app", "sh", "-c"],
+        "debuggerPath": "/vsdbg/vsdbg"
+      },
+      "sourceFileMap": { "/src": "${workspaceFolder}/JLStore" }
     }
   ]
 }

@@ -11,17 +11,28 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 WORKDIR /src    
 # Copiamo i file di progetto e ripristiniamo le dipendenze
-COPY JLStore/JLStore.csproj JLStore/
-RUN dotnet restore JLStore/JLStore.csproj
+COPY JLStore.csproj .
+RUN dotnet restore JLStore.csproj
 # Copiamo il resto del codice sorgente
 COPY . .
 
-WORKDIR /src/JLStore
 # Costruiamo l'applicazione in modalità Release
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish JLStore.csproj -c Debug -o /app/publish /p:UseAppHost=false \
+    -p:DebugSymbols=true -p:DebugType=portable \
+    -p:PublishTrimmed=false -p:PublishReadyToRun=false
 
 FROM base AS final
 WORKDIR /app
+
+USER root
+RUN apt-get update && apt-get install -y wget unzip \
+ && mkdir -p /vsdbg \
+ && wget -q https://aka.ms/getvsdbgsh -O /tmp/getvsdbg.sh \
+ && bash /tmp/getvsdbg.sh -v latest -l /vsdbg \
+ && rm -rf /var/lib/apt/lists/*
+
+USER vscode
+
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "JLStore.dll"]
 
