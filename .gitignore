@@ -63,6 +63,9 @@ secrets.json
 appsettings.Local.json
 appsettings.*.local.json
 appsettings.Development.local.json
+# .gitignore
+.nuget/
+
 
 # --- Frontend eventuale (se presenti) ---
 node_modules/

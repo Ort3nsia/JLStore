@@ -11,14 +11,7 @@
 		"vscode": {
 		"extensions": [
 			"ms-dotnettools.vscode-dotnet-runtime",
-			"ms-dotnettools.csharp",
-            "ms-dotnettools.csdevkit",
-            "ms-azuretools.vscode-containers",
-            "ms-vscode-remote.remote-containers",
-            "ms-vscode.remote-server",
-            "ms-vscode.remote-explorer",
-            "ms-vscode-remote.remote-wsl",
-            "streetsidesoftware.code-spell-checker"
+			"ms-dotnettools.csharp"
 		]
 		}
 	},
