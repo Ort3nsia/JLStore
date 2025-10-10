@@ -4,26 +4,56 @@ using JLStore.Infrastructure.Data;
 using JLStore.Infrastructure.Repositories;
 using JLStore.Mapping;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var conn = builder.Configuration.GetConnectionString("Default")
-           ?? "Data Source=./Data/jlstore.db";
+// Rileva se stai girando dentro un container
+var runningInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
 
-builder.Services.AddDbContext<DataContext>(opt =>
-    opt.UseSqlServer(conn, o => o.EnableRetryOnFailure()));
+// In Development, FUORI dal container carica il .env della repo (per MSSQL_SA_PASSWORD)
+if (builder.Environment.IsDevelopment() && !runningInContainer)
+{
+    var repoRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, ".."));
+    var envPath = Path.Combine(repoRoot, ".env");
+    if (File.Exists(envPath))
+    {
+        // Richiede: dotnet add JLStore package DotNetEnv
+        DotNetEnv.Env.Load(envPath);
+    }
+}
 
+// Connection string base dai settings
+// Se in compose passi ConnectionStrings__Default via environment, questa la sovrascrive automaticamente
+var baseCs = builder.Configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("ConnectionStrings:Default mancante.");
+
+// Se la password non è nella connection, prova a leggerla dall'ambiente (utile FUORI compose)
+var pwd = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+var csb = new SqlConnectionStringBuilder(baseCs);
+if (!string.IsNullOrWhiteSpace(pwd))
+{
+    csb.Password = pwd;
+}
+var finalCs = csb.ConnectionString;
 
 // DI
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+// EF Core
+builder.Services.AddDbContext<DataContext>(opt =>
+    opt.UseSqlServer(finalCs, sql => sql.EnableRetryOnFailure())
+);
+
+// Repo/Servizi
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
-// AutoMapper (v15+)
+// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<CustomerProfile>();
 });
-
 
 // API + Swagger
 builder.Services.AddControllers();
@@ -32,7 +62,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment() || 
+// Swagger in Development (o forzato via env)
+if (app.Environment.IsDevelopment() ||
     Environment.GetEnvironmentVariable("FORCE_SWAGGER") == "1")
 {
     app.UseSwagger();
@@ -43,6 +74,27 @@ if (app.Environment.IsDevelopment() ||
     });
 }
 
+// Applica automaticamente le migration in Development, con un piccolo retry (utile in compose)
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+    var attempts = 0;
+    while (true)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+            break;
+        }
+        catch (SqlException) when (attempts++ < 10)
+        {
+            // Il DB potrebbe non essere ancora pronto: aspetta e ritenta
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+    }
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -51,6 +103,31 @@ if (!app.Environment.IsDevelopment())
 
 app.MapControllers();
 
+// DIAGNOSTICA
+app.MapGet("/diag/dbinfo", async (DataContext db) =>
+{
+    await using var cmd = db.Database.GetDbConnection().CreateCommand();
+    cmd.CommandText = "SELECT DB_NAME() as Db, @@SERVERNAME as ServerName, SUSER_SNAME() as LoginName, @@SPID as Spid";
+    await db.Database.OpenConnectionAsync();
+    await using var r = await cmd.ExecuteReaderAsync();
+    var rows = new List<Dictionary<string, object>>();
+    while (await r.ReadAsync())
+        rows.Add(Enumerable.Range(0, r.FieldCount).ToDictionary(i => r.GetName(i), i => r.GetValue(i)));
+    return Results.Ok(rows);
+});
+
+app.MapGet("/diag/customers-last", async (DataContext db) =>
+{
+    var list = await db.Customers
+        .AsNoTracking()
+        .OrderByDescending(c => c.ID)
+        .Select(c => new { c.ID, c.Name, c.Surname })
+        .Take(5)
+        .ToListAsync();
+    return Results.Ok(list);
+});
+
+// Seeding (dopo la migrate)
 using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<DataContext>();
