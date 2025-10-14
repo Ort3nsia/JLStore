@@ -1,23 +1,23 @@
 {
   "version": "0.2.0",
   "configurations": [
-    {
-      "name": "Backend Debugger",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/JLStore/bin/Debug/net9.0/JLStore.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/JLStore",
-      "stopAtEntry": false,
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      {
+        "name": "Backend Debugger",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${workspaceFolder}/JLStore/bin/Debug/net9.0/JLStore.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/JLStore",
+        "stopAtEntry": false,
+        "serverReadyAction": {
+          "action": "openExternally",
+          "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+        },
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
       },
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     {
       "name": "Attach .NET (Podman Compose)",
       "type": "coreclr",
