@@ -5,7 +5,18 @@
     "dockerfile": "../JLStore/Containerfile"
   },
   "workspaceFolder": "/workspaces/JLStore",
-
+  "containerEnv": {
+    "SQLSERVER_HOST": "jlstore-mssql",
+    "SQLSERVER_PORT": "1433",
+    "MSSQL_SA_PASSWORD": "StrongPassw0rd!",
+    "ConnectionStrings__Default": "Server=jlstore-mssql,1433;Database=jlstore;User Id=sa;TrustServerCertificate=True",
+    "ASPNETCORE_URLS": "https://0.0.0.0:7250;http://0.0.0.0:5250",
+    "ASPNETCORE_Kestrel__Certificates__Default__Path": "/home/vscode/.aspnet/https/JLStore.pfx",
+    "ASPNETCORE_Kestrel__Certificates__Default__Password": "devcert"
+  },
+  "runArgs": [
+    "--network=jlstore_default"             // <— unione alla rete del compose
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -25,5 +36,6 @@
   "onCreateCommand": "sudo mkdir -p /home/vscode/.nuget/NuGet /home/vscode/.nuget/packages && sudo chown -R vscode:vscode /home/vscode/.nuget",
 
   // Restore and rebuild
-  "postCreateCommand": "dotnet restore ./JLStore/JLStore.csproj -v minimal && dotnet build ./JLStore/JLStore.csproj -v minimal"
+  "postCreateCommand": "bash -lc 'mkdir -p /home/vscode/.aspnet/https && [ -f /home/vscode/.aspnet/https/JLStore.pfx ] || dotnet dev-certs https -ep /home/vscode/.aspnet/https/JLStore.pfx -p devcert; dotnet restore ./JLStore/JLStore.csproj -v minimal && dotnet build ./JLStore/JLStore.csproj -v minimal'"
+
 }

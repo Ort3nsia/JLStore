@@ -24,18 +24,58 @@ if (builder.Environment.IsDevelopment() && !runningInContainer)
 }
 
 // Connection string base dai settings
-// Se in compose passi ConnectionStrings__Default via environment, questa la sovrascrive automaticamente
-var baseCs = builder.Configuration.GetConnectionString("Default")
+// Connection string base dai settings
+// Se in compose o nel dev-container passi ConnectionStrings__Default / SQLSERVER_CONNECTION via env, queste sovrascrivono
+var csFromEnv = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
+              ?? Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION");
+
+var baseCs = csFromEnv
+            ?? builder.Configuration.GetConnectionString("Default")
             ?? throw new InvalidOperationException("ConnectionStrings:Default mancante.");
 
-// Se la password non è nella connection, prova a leggerla dall'ambiente (utile FUORI compose)
-var pwd = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
 var csb = new SqlConnectionStringBuilder(baseCs);
-if (!string.IsNullOrWhiteSpace(pwd))
+
+// Sei in un container? (variabile già sopra)
+var containerRuntime = Environment.GetEnvironmentVariable("CONTAINER_RUNTIME") ?? "docker";
+var hostGateway = containerRuntime.Equals("podman", StringComparison.OrdinalIgnoreCase)
+    ? "host.containers.internal"
+    : "host.docker.internal";
+
+// Se la DataSource è "locale" e siamo in container, forza host/porta
+bool isLocalDataSource =
+    string.IsNullOrWhiteSpace(csb.DataSource) ||
+    csb.DataSource.Equals(".", StringComparison.OrdinalIgnoreCase) ||
+    csb.DataSource.Contains("(localdb)", StringComparison.OrdinalIgnoreCase) ||
+    csb.DataSource.Contains("localhost", StringComparison.OrdinalIgnoreCase) ||
+    csb.DataSource.StartsWith("127.0.0.1");
+
+if (runningInContainer && isLocalDataSource)
 {
-    csb.Password = pwd;
+    // Se unisci il dev-container alla rete del compose, passa SQLSERVER_HOST (es. "jlstore-mssql");
+    // altrimenti userà l’host gateway (richiede ports esposte, es. 1433:1433)
+    var host = Environment.GetEnvironmentVariable("SQLSERVER_HOST") ?? hostGateway;
+    var port = Environment.GetEnvironmentVariable("SQLSERVER_PORT") ?? "1433";
+    csb.DataSource = $"{host},{port}";
 }
+
+// Password: usa quella nella CS, altrimenti prova da ENV (utile in dev-container)
+if (string.IsNullOrWhiteSpace(csb.Password))
+{
+    var pwd = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD")
+           ?? Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD");
+    if (!string.IsNullOrWhiteSpace(pwd))
+        csb.Password = pwd;
+}
+
+// Dev: evita rogne di certificato; se Encrypt mancante, disattivalo (non tocco se già impostato)
+csb.TrustServerCertificate = true;
+if (!csb.ContainsKey("Encrypt"))
+{
+    csb.Encrypt = false;
+}
+
 var finalCs = csb.ConnectionString;
+
 
 // DI
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
