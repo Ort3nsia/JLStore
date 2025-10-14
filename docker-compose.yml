@@ -2,6 +2,7 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: jlstore-mssql
+    command: ["/opt/mssql/bin/sqlservr", "-T272"]
     restart: unless-stopped
     ports: ["1433:1433"]
     environment:
