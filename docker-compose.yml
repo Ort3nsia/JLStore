@@ -1,14 +1,29 @@
+version: "3.9"
+
+x-app-base: &app-base
+  build:
+    context: ./JLStore
+    dockerfile: Containerfile
+  environment:
+    ASPNETCORE_ENVIRONMENT: "Development"
+    ASPNETCORE_URLS: "http://+:5250"   # <-- SOLO HTTP
+    DOTNET_RUNNING_IN_CONTAINER: "true"
+  ports:
+    - "5250:5250"
+  restart: unless-stopped
+
 services:
+  # === MSSQL PROFILE =========================================================
   mssql:
+    profiles: ["mssql"]
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: jlstore-mssql
     command: ["/opt/mssql/bin/sqlservr", "-T272"]
-    restart: unless-stopped
     ports: ["1433:1433"]
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
       MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-StrongPassw0rd!}"
     volumes:
       - mssqldata:/var/opt/mssql
     healthcheck:
@@ -16,52 +31,57 @@ services:
       interval: 5s
       timeout: 3s
       retries: 30
+    restart: unless-stopped
 
-  devcert-init:
-    image: mcr.microsoft.com/dotnet/sdk:9.0
-    environment:
-      CERT_PASSWORD: "${CERT_PASSWORD}"
-    command: >
-      bash -lc '
-        set -euo pipefail
-        mkdir -p /https
-        rm -f /https/aspnetapp.pfx
-        dotnet dev-certs https -ep /https/aspnetapp.pfx -p "$CERT_PASSWORD" -q
-        if ! openssl pkcs12 -in /https/aspnetapp.pfx -passin pass:"$CERT_PASSWORD" -nokeys -clcerts >/dev/null 2>&1; then
-          echo "ERRORE: PFX non apribile con la password fornita"; exit 1
-        fi
-        chmod 644 /https/aspnetapp.pfx
-        ls -l /https
-      '
-    volumes:
-      - devcerts:/https
-    restart: "no"
-
-  jlstore-app:
-    build:
-      context: ./JLStore
-      dockerfile: Containerfile
-    container_name: jlstore-app
+  jlstore-app-mssql:
+    profiles: ["mssql"]
+    <<: *app-base
+    container_name: jlstore-app-mssql
     depends_on:
       mssql:
         condition: service_healthy
-      devcert-init:
-        condition: service_completed_successfully
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      ASPNETCORE_URLS: "https://+:7250;http://+:5250"
-      ASPNETCORE_HTTPS_PORTS: "7250"
-      ASPNETCORE_HTTP_PORTS: "5250"
-      ConnectionStrings__Default: "Server=mssql,1433;Database=jlstore;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
-      ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
-      ASPNETCORE_Kestrel__Certificates__Default__Password: "${CERT_PASSWORD:-devcert}"
+      ASPNETCORE_URLS: "http://+:5250"
+      DOTNET_RUNNING_IN_CONTAINER: "true"
+
+      DB_PROVIDER: "sqlserver"
+      ConnectionStrings__Default: "Server=mssql,1433;Database=jlstore;User Id=sa;Password=${MSSQL_SA_PASSWORD:-StrongPassw0rd!};Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
+
+  # === POSTGRES PROFILE ======================================================
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16
+    container_name: jlstore-postgres
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: "jlstore"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-mysecretpassword}"
     volumes:
-      - devcerts:/https:ro
-    ports:
-      - "5250:5250"
-      - "7250:7250"
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
     restart: unless-stopped
 
+  jlstore-app-postgres:
+    profiles: ["postgres"]
+    <<: *app-base
+    container_name: jlstore-app-postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:5250"
+      DOTNET_RUNNING_IN_CONTAINER: "true"
+
+      DB_PROVIDER: "postgres"
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=jlstore;Username=postgres;Password=${POSTGRES_PASSWORD:-mysecretpassword};SSL Mode=Prefer;Trust Server Certificate=true"
+      
 volumes:
   mssqldata:
-  devcerts:
+  pgdata:

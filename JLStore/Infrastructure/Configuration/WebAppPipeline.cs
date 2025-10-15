@@ -1,6 +1,7 @@
 using JLStore.Infrastructure.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace JLStore.Infrastructure.Configuration;
 
@@ -28,7 +29,7 @@ public static class WebAppPipeline
 
     public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app)
     {
-        using var scope = app.Services.CreateScope();
+        await using var scope = app.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
         if (app.Environment.IsDevelopment())
@@ -38,20 +39,18 @@ public static class WebAppPipeline
             {
                 try
                 {
-                    await db.Database.MigrateAsync();
+                    var pending = await db.Database.GetPendingMigrationsAsync();
+                    if (pending.Any())
+                        await db.Database.MigrateAsync();
                     break;
                 }
-                catch (SqlException) when (attempts++ < 10)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                }
+                catch (PostgresException) when (attempts++ < 20) { await Task.Delay(TimeSpan.FromSeconds(3)); }
+                catch (SqlException)      when (attempts++ < 20) { await Task.Delay(TimeSpan.FromSeconds(5)); }
             }
         }
-        else
-        {
-            // In prod potresti voler migrare esplicitamente fuori dal runtime
-        }
 
+        // Seed idempotente (deve poter girare più volte senza rompere)
         await DataSeed.EnsureSeedAsync(db);
     }
+
 }

@@ -1,4 +1,3 @@
-using JLStore.Infrastructure.Configuration;
 using JLStore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +7,6 @@ public static class PersistenceRegistration
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration config, IHostEnvironment env)
     {
-        // In futuro potrai leggere anche "Database:Provider" o ENV DB_PROVIDER
         var provider = Environment.GetEnvironmentVariable("DB_PROVIDER")
                     ?? config["Database:Provider"]
                     ?? "sqlserver";
@@ -17,7 +15,22 @@ public static class PersistenceRegistration
         {
             var cs = ConnectionStringFactory.BuildForSqlServer(config, env);
             services.AddDbContext<DataContext>(opt =>
-                opt.UseSqlServer(cs, sql => sql.EnableRetryOnFailure()));
+                opt.UseSqlServer(cs, sql => {
+                    sql.MigrationsAssembly("JLStore.Migrations.SqlServer");
+                    sql.MigrationsHistoryTable("__EFMigrationsHistory_Sql", "dbo");
+                })
+            );
+        }
+        else if (provider.Equals("postgres", StringComparison.OrdinalIgnoreCase))
+        {
+            var cs = ConnectionStringFactory.BuildForPostgres(config, env);
+            services.AddDbContext<DataContext>(opt =>
+            {
+                opt.UseNpgsql(cs, npg => {
+                    npg.MigrationsAssembly("JLStore.Migrations.Postgres");
+                    npg.MigrationsHistoryTable("__EFMigrationsHistory_Pg", "public");
+                });
+            });
         }
         else
         {
