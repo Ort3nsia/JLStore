@@ -11,8 +11,12 @@ var runningInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_C
 if (builder.Environment.IsDevelopment() && !runningInContainer)
 {
     var repoRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, ".."));
+    var envLocal = Path.Combine(repoRoot, ".env.local");
     var envPath  = Path.Combine(repoRoot, ".env");
-    if (File.Exists(envPath)) Env.Load(envPath);
+
+    // Se esiste .env.local, lo carico, altrimenti .env
+    if (File.Exists(envLocal)) DotNetEnv.Env.Load(envLocal);
+    else if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
 }
 
 // ===== Persistence (DbContext + provider) =====

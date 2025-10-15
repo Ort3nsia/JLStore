@@ -9,7 +9,7 @@ namespace JLStore.Migrations.Postgres
     {
         public DataContext CreateDbContext(string[] args)
         {
-            var cs = Environment.GetEnvironmentVariable("ConnectionStrings__Postgres")
+            var cs = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
                 ?? "Host=localhost;Port=5432;Database=JLStore;Username=postgres;Password=mysecretpassword;SSL Mode=Prefer;Trust Server Certificate=true";
 
             var options = new DbContextOptionsBuilder<DataContext>()
